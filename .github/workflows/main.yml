@@ -1,0 +1,32 @@
+# save_and_open_rdp.py
+import os
+import subprocess
+from pathlib import Path
+
+def create_rdp_file(host, username=None, filename="remote.rdp"):
+    props = [
+        f"full address:s:{host}",
+        "prompt for credentials:i:1",   # prompt for password
+        "administrative session:i:0",
+        "screen mode id:i:1",          # windowed
+        "desktopwidth:i:1366",
+        "desktopheight:i:768",
+        "session bpp:i:32"
+    ]
+    if username:
+        props.append(f"username:s:{username}")
+
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write("\r\n".join(props))
+    return filename
+
+def open_rdp(filename):
+    mstsc = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "System32", "mstsc.exe")
+    subprocess.run([mstsc, str(filename)], check=False)
+
+if __name__ == "__main__":
+    host = "192.0.2.10"    # replace with your host or hostname
+    username = None        # set if you want username baked into file (will still prompt for password)
+    rdp_file = create_rdp_file(host, username, filename="myserver.rdp")
+    print(f"Created {rdp_file}. Launching RDP client...")
+    open_rdp(rdp_file)
